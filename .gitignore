@@ -1,4 +1,7 @@
 nasbench_full.tfrecord
+nasbench_only108.tfrecord
+graphs/**/*
+
 .idea
 # Byte-compiled / optimized / DLL files
 __pycache__/
