@@ -11,6 +11,9 @@ from trials.Constants import *
 from trials.ModelSpec import SpecWrapper
 
 
+
+
+
 def make_specs(population: List[str]) -> List[SpecWrapper]:
     """
     Transform a list of hashes into a population of SpecWrappers.
@@ -21,19 +24,27 @@ def make_specs(population: List[str]) -> List[SpecWrapper]:
     return [SpecWrapper(ind) for ind in population]
 
 
+
+ALL_SPECS = dict()
 def get_spec(spec_hash: str) -> Union[SpecWrapper, None]:
     """
     Fetch a spec based on the hash.
     :param spec_hash: The hash of the spec.
     :return: A SpecWrapper of the spec or None if it doesn't exist.
     """
-    if not spec_hash in all_specs:
+    global ALL_SPECS
+
+    if not spec_hash in ALL_HASH:
         return None
+    if spec_hash in ALL_SPECS:
+        return ALL_SPECS[spec_hash]
 
     spec = nasbench.get_metrics_from_hash(spec_hash)
     matrix: np.ndarray = spec[0]["module_adjacency"]
     ops: List[str] = spec[0]["module_operations"]
-    return SpecWrapper(matrix=matrix, ops=ops)
+    spec = SpecWrapper(matrix=matrix, ops=ops)
+    ALL_SPECS[spec_hash] = spec
+    return spec
 
 
 def random_spec() -> SpecWrapper:
@@ -41,7 +52,7 @@ def random_spec() -> SpecWrapper:
     Return a random spec.
     :return: A SpecWrapper for the spec.
     """
-    return get_spec(random.choice(all_specs))
+    return get_spec(random.choice(ALL_HASH))
 
 
 def build_experiment_results(name: str, population: List[SpecWrapper], best: List[SpecWrapper], all: List[SpecWrapper]):
@@ -119,8 +130,12 @@ def reset_trial_stats(seed: int):
     """
     Resets RNG and budget counters to allow for deterministic & reproducible trials.
     """
-
+    print('Reset stats.')
     random.seed(seed)
     np.random.seed(seed)
     nasbench.reset_budget_counters()
 
+
+def get_time_taken():
+    time_spent, _ = nasbench.get_budget_counters()
+    return time_spent

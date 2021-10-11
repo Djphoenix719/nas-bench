@@ -70,6 +70,7 @@ def drop_worst_fn(n_worst: int) -> Callable[[List[SpecWrapper]], List[SpecWrappe
     Drop the k worst candidates and return the remaining population.
     :param n_worst: Number of worst candidates to drop.
     """
+    n_worst = int(n_worst)
     def fn(population: List[SpecWrapper]):
         population = list(population)
         population.sort()

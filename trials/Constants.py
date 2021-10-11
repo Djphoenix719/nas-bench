@@ -1,6 +1,8 @@
 import os
 from nasbench import api
 
+from trials.FastList import FastList
+
 INPUT = "input"
 OUTPUT = "output"
 CONV3X3 = "conv3x3-bn-relu"
@@ -23,4 +25,4 @@ OUTPUT_FOLDER = os.path.join(os.getcwd(), 'graphs')
 # nasbench = api.NASBench("nasbench_full.tfrecord")
 nasbench = api.NASBench("nasbench_only108.tfrecord")
 
-all_specs = list(nasbench.hash_iterator())
+ALL_HASH = FastList(nasbench.hash_iterator())
