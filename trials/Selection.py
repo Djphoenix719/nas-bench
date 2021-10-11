@@ -11,6 +11,7 @@ def sel_best_fn(n_best: int) -> Callable[[List[SpecWrapper]], List[SpecWrapper]]
     :param n_best: The number of top individuals to select.
     :return: The selected individuals.
     """
+
     def fn(population: List[SpecWrapper]):
         # clone the list so we don't sort in place
         population = list(population)
@@ -18,6 +19,7 @@ def sel_best_fn(n_best: int) -> Callable[[List[SpecWrapper]], List[SpecWrapper]]
         return population[-n_best:]
 
     return fn
+
 
 def sel_random_fn(n_rand: int) -> Callable[[List[SpecWrapper]], List[SpecWrapper]]:
     """
@@ -33,7 +35,9 @@ def sel_random_fn(n_rand: int) -> Callable[[List[SpecWrapper]], List[SpecWrapper
     return fn
 
 
-def sel_tournament_fn(n_rand: int, n_best: int) -> Callable[[List[SpecWrapper]], List[SpecWrapper]]:
+def sel_tournament_fn(
+    n_rand: int, n_best: int
+) -> Callable[[List[SpecWrapper]], List[SpecWrapper]]:
     """
     Select the n best individuals from amongst k randomly selected candidates.
     :param n_rand: The number of candidates to randomly select.
@@ -71,10 +75,10 @@ def drop_worst_fn(n_worst: int) -> Callable[[List[SpecWrapper]], List[SpecWrappe
     :param n_worst: Number of worst candidates to drop.
     """
     n_worst = int(n_worst)
+
     def fn(population: List[SpecWrapper]):
         population = list(population)
         population.sort()
         return population[n_worst:]
 
     return fn
-

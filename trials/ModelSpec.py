@@ -14,6 +14,7 @@ class ModelData:
     """
     Wraps up resulting data from NASBench.query in a class for code cleanliness.
     """
+
     hash: str
     matrix: List[List[int]]
     operations: List[str]
@@ -32,6 +33,7 @@ class SpecWrapper(ModelSpec):
     """
     Wraps a model to allow easier access to the resulting data of the model.
     """
+
     def __init__(self, matrix: Union[str, np.ndarray], ops: List[str] = None):
         self.id = next(SpecWrapper.id_iter)
 
@@ -78,7 +80,7 @@ class SpecWrapper(ModelSpec):
             data["training_time"],
             data["train_accuracy"],
             data["validation_accuracy"],
-            data["test_accuracy"]
+            data["test_accuracy"],
         )
 
     def __repr__(self):

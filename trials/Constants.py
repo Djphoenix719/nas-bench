@@ -20,7 +20,7 @@ ALLOWED_EDGES = [0, 1]  # Binary adjacency matrix
 
 RNG_SEED = 42
 
-OUTPUT_FOLDER = os.path.join(os.getcwd(), 'graphs')
+OUTPUT_FOLDER = os.path.join(os.getcwd(), "graphs")
 
 # nasbench = api.NASBench("nasbench_full.tfrecord")
 nasbench = api.NASBench("nasbench_only108.tfrecord")

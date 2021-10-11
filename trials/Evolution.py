@@ -24,7 +24,9 @@ from trials.Constants import nasbench
 from trials.ModelSpec import SpecWrapper
 
 
-def crossover_spec(spec_a: SpecWrapper, spec_b: SpecWrapper, cx_prb: float = 0.5) -> SpecWrapper:
+def crossover_spec(
+    spec_a: SpecWrapper, spec_b: SpecWrapper, cx_prb: float = 0.5
+) -> SpecWrapper:
     assert spec_a.matrix.shape == spec_b.matrix.shape
 
     while True:
@@ -88,6 +90,3 @@ def mutate_fn(mut_rate: float) -> Callable[[List[SpecWrapper]], List[SpecWrapper
         return population
 
     return fn
-
-
-

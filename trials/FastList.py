@@ -4,10 +4,13 @@ from typing import Set
 from typing import TypeVar
 
 _T = TypeVar("_T")
+
+
 class FastList(list, Generic[_T]):
-    '''
+    """
     A list that maintains a collection of members in a set for fast lookups.
-    '''
+    """
+
     _set: Set[_T]
 
     def __init__(self, seq: Iterable[_T] = ()):
