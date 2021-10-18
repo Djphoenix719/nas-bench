@@ -24,6 +24,10 @@ class ModelData:
     valid_accuracy: float
     test_accuracy: float
 
+    @property
+    def total_accuracy(self) -> float:
+        return (self.test_accuracy + self.valid_accuracy)/2
+
 
 class SpecWrapper(ModelSpec):
 
@@ -34,8 +38,9 @@ class SpecWrapper(ModelSpec):
     Wraps a model to allow easier access to the resulting data of the model.
     """
 
-    def __init__(self, matrix: Union[str, np.ndarray], ops: List[str] = None):
+    def __init__(self, matrix: Union[str, np.ndarray], ops: List[str] = None, stop_halfway: bool = False):
         self.id = next(SpecWrapper.id_iter)
+        self.stop_halfway = stop_halfway
 
         if isinstance(matrix, str):
             spec = nasbench.get_metrics_from_hash(matrix)
@@ -64,14 +69,14 @@ class SpecWrapper(ModelSpec):
     def get_hash(self):
         return self.hash_spec(nasbench.config["available_ops"])
 
-    @lru_cache(maxsize=1)
+    @lru_cache(maxsize = 1)
     def get_data(self):
         """
         Get resultant data from NASBench.
         The LRU cache ensures we don"t add time to the budget counters multiple times.
         :return:
         """
-        data = nasbench.query(self)
+        data = nasbench.query(self, stop_halfway=self.stop_halfway)
         return ModelData(
             self.hash_spec(nasbench.config["available_ops"]),
             data["module_adjacency"],

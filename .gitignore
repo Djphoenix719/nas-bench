@@ -1,7 +1,7 @@
 nasbench_full.tfrecord
 nasbench_only108.tfrecord
 graphs/**/*
-Sandbox.ipynb
+*.ipynb
 
 .idea
 # Byte-compiled / optimized / DLL files

@@ -5,6 +5,7 @@ from typing import Set
 from trials.Constants import RNG_SEED
 from trials.ModelSpec import SpecWrapper
 from trials.Selection import sel_best_fn
+from trials.Utilities import banner
 from trials.Utilities import get_spec
 from trials.Utilities import reset_trial_stats
 
@@ -17,6 +18,7 @@ def search(
     mut_fn: Callable[[List[SpecWrapper]], List[SpecWrapper]],
     sel_fn: Callable[[List[SpecWrapper]], List[SpecWrapper]],
     drp_fn: Callable[[List[SpecWrapper]], List[SpecWrapper]],
+    stop_halfway: bool = True
 ):
     sel_best = sel_best_fn(num_best)
 
@@ -25,7 +27,8 @@ def search(
 
         # initialize our population list, update budget counters
         # this also effectively "trains" the initial population
-        population = [get_spec(ind.get_hash()) for ind in population]
+        population = [get_spec(ind.get_hash(), stop_halfway=stop_halfway) for ind in population]
+        generations = [list(population)]
 
         # desired size of the population
         p_size = len(population)
@@ -47,7 +50,7 @@ def search(
             nonlocal cur_time
             done.update(map(lambda x: x.get_hash(), items))
             cur_time = sum(
-                [ind.get_data().train_time for ind in map(lambda x: get_spec(x), done)]
+                [ind.get_data().train_time for ind in map(lambda x: get_spec(x, stop_halfway=stop_halfway), done)]
             )
 
         update_done(population)
@@ -72,19 +75,18 @@ def search(
                 # so if we hit a duplicate candidate, we should not
                 # add more training time, as it is wasteful
                 cand_hashes = [cand.get_hash() for cand in candidates]
-                cand_hashes = [hsh for hsh in cand_hashes if hsh not in done]
-
                 # remove dupe hashes
-                candidates = [get_spec(hsh) for hsh in cand_hashes]
+                cand_hashes = [hsh for hsh in cand_hashes if hsh not in done]
+                candidates = [get_spec(hsh, stop_halfway=stop_halfway) for hsh in cand_hashes]
 
                 # update the list of new specs
                 new_specs = [*new_specs, *candidates]
 
             population = [*population, *new_specs][:p_size]
+            generations.append(list(population))
 
             # [ind.get_data() for ind in population]
             update_done(population)
-
             print_update()
 
         best = sel_best(population)
@@ -95,14 +97,12 @@ def search(
             f"Best in trial -- Test: {abs_best.test_accuracy:0.7f}, Valid: {abs_best.valid_accuracy:0.7f}"
         )
 
-        return population, best, done
+        return population, best, done, generations
 
-    results: [List[List[SpecWrapper], List[SpecWrapper], Set[str]]] = []
+    results: [List[List[SpecWrapper], List[SpecWrapper], Set[str], List[List[SpecWrapper]]]] = []
     for epoch_num in range(num_epochs):
-        print("-" * 50)
-        population, best, done = run_epoch(epoch_num, initial_population)
-        results.append([population, best, done])
-        print(f"Finished evaluation, {len(done)} models evaluated")
-        print("-" * 50)
+        population, best, done, generations = run_epoch(epoch_num, initial_population)
+        results.append([population, best, done, generations])
+        banner(f"Finished evaluation, epoch {epoch_num+1}/{num_epochs}, {len(done)} models evaluated")
 
     return results

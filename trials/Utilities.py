@@ -1,5 +1,6 @@
 import os
 import random
+from typing import Tuple
 
 import numpy as np
 import pandas as pd
@@ -21,40 +22,31 @@ def make_specs(population: List[str]) -> List[SpecWrapper]:
     return [SpecWrapper(ind) for ind in population]
 
 
-ALL_SPECS = dict()
-
-
-def get_spec(spec_hash: str) -> Union[SpecWrapper, None]:
+def get_spec(spec_hash: str, stop_halfway: bool = False) -> Union[SpecWrapper, None]:
     """
     Fetch a spec based on the hash.
     :param spec_hash: The hash of the spec.
     :return: A SpecWrapper of the spec or None if it doesn't exist.
     """
-    global ALL_SPECS
-
     if not spec_hash in ALL_HASH:
         return None
-    if spec_hash in ALL_SPECS:
-        return ALL_SPECS[spec_hash]
 
     spec = nasbench.get_metrics_from_hash(spec_hash)
     matrix: np.ndarray = spec[0]["module_adjacency"]
     ops: List[str] = spec[0]["module_operations"]
-    spec = SpecWrapper(matrix=matrix, ops=ops)
-    ALL_SPECS[spec_hash] = spec
+    spec = SpecWrapper(matrix=matrix, ops=ops, stop_halfway=stop_halfway)
     return spec
 
 
-def random_spec() -> SpecWrapper:
+def random_spec(stop_halfway: bool = False) -> SpecWrapper:
     """
     Return a random spec.
     :return: A SpecWrapper for the spec.
     """
-    return get_spec(random.choice(ALL_HASH))
+    return get_spec(random.choice(ALL_HASH), stop_halfway=stop_halfway)
 
 
 def build_experiment_results(
-    name: str,
     population: List[SpecWrapper],
     best: List[SpecWrapper],
     all: List[SpecWrapper],
@@ -67,7 +59,7 @@ def build_experiment_results(
     :return: DataFrames for each set.
     """
 
-    def construct(items: List[SpecWrapper]) -> [pd.DataFrame, pd.DataFrame]:
+    def construct(items: List[SpecWrapper]) -> Tuple[pd.DataFrame, pd.DataFrame]:
         df = pd.DataFrame(list(map(lambda x: x.get_data(), items)))
         df = df.drop(columns=["matrix", "operations", "hash"])
         df["total_accuracy"] = df.apply(
@@ -81,17 +73,10 @@ def build_experiment_results(
     bdf, bdf_stats = construct(best)
     adf, adf_stats = construct(all)
 
-    write_table_html(pdf, f"{name}-PopSpecs.html")
-    write_table_html(bdf, f"{name}-BestSpecs.html")
-    write_table_html(adf, f"{name}-AllSpecs.html")
-    write_table_html(pdf_stats, f"{name}-PopStats.html")
-    write_table_html(bdf_stats, f"{name}-BestStats.html")
-    write_table_html(adf_stats, f"{name}-AllStats.html")
-
-    return pdf, bdf, adf
+    return pdf, bdf, adf, pdf_stats, bdf_stats, adf_stats
 
 
-def write_table_html(df: pd.DataFrame, name: str, over_write: bool = False) -> None:
+def write_table_html(df: pd.DataFrame, path: str, name: str, over_write: bool = False) -> None:
     """
     Write a table of html, optionally over-writing existing tables.
     :param df: The dataframe to write to file.
@@ -99,7 +84,7 @@ def write_table_html(df: pd.DataFrame, name: str, over_write: bool = False) -> N
     :param over_write: Over-write the file if it already exists.
     """
 
-    path = os.path.join(OUTPUT_FOLDER, name)
+    path = os.path.join(path, name)
     if os.path.exists(path) and not over_write:
         return
 
@@ -148,3 +133,11 @@ def reset_trial_stats(seed: int):
 def get_time_taken():
     time_spent, _ = nasbench.get_budget_counters()
     return time_spent
+
+
+def banner(value: str, min_width: int = 50, character: str = "-") -> None:
+    width = max(min_width, len(value) + 2)
+
+    print(character * width)
+    print(character + value.center(width - 2) + character)
+    print(character * width)

@@ -60,6 +60,7 @@ def sel_middle_fn(n_sel: int) -> Callable[[List[SpecWrapper]], List[SpecWrapper]
     Select the n middle individuals from amongst the population.
     :param n_sel: The number of candidates to randomly select.
     """
+    n_sel = int(n_sel)
 
     def fn(population: List[SpecWrapper]):
         population = list(population)
@@ -80,5 +81,20 @@ def drop_worst_fn(n_worst: int) -> Callable[[List[SpecWrapper]], List[SpecWrappe
         population = list(population)
         population.sort()
         return population[n_worst:]
+
+    return fn
+
+
+def drop_oldest_fn(n_oldest: int) -> Callable[[List[SpecWrapper]], List[SpecWrapper]]:
+    """
+    Drop the k oldest candidates and return the remaining population.
+    :param n_oldest: Number of oldest candidates to drop.
+    """
+    n_oldest = int(n_oldest)
+
+    def fn(population: List[SpecWrapper]):
+        population = list(population)
+        population.sort(key=lambda x: x.id)
+        return population[n_oldest:]
 
     return fn
