@@ -18,7 +18,7 @@ def search(
     mut_fn: Callable[[List[SpecWrapper]], List[SpecWrapper]],
     sel_fn: Callable[[List[SpecWrapper]], List[SpecWrapper]],
     drp_fn: Callable[[List[SpecWrapper]], List[SpecWrapper]],
-    stop_halfway: bool = True
+    stop_halfway: bool = True,
 ):
     sel_best = sel_best_fn(num_best)
 
@@ -27,7 +27,9 @@ def search(
 
         # initialize our population list, update budget counters
         # this also effectively "trains" the initial population
-        population = [get_spec(ind.get_hash(), stop_halfway=stop_halfway) for ind in population]
+        population = [
+            get_spec(ind.get_hash(), stop_halfway=stop_halfway) for ind in population
+        ]
         generations = [list(population)]
 
         # desired size of the population
@@ -50,7 +52,12 @@ def search(
             nonlocal cur_time
             done.update(map(lambda x: x.get_hash(), items))
             cur_time = sum(
-                [ind.get_data().train_time for ind in map(lambda x: get_spec(x, stop_halfway=stop_halfway), done)]
+                [
+                    ind.get_data().train_time
+                    for ind in map(
+                        lambda x: get_spec(x, stop_halfway=stop_halfway), done
+                    )
+                ]
             )
 
         update_done(population)
@@ -77,7 +84,9 @@ def search(
                 cand_hashes = [cand.get_hash() for cand in candidates]
                 # remove dupe hashes
                 cand_hashes = [hsh for hsh in cand_hashes if hsh not in done]
-                candidates = [get_spec(hsh, stop_halfway=stop_halfway) for hsh in cand_hashes]
+                candidates = [
+                    get_spec(hsh, stop_halfway=stop_halfway) for hsh in cand_hashes
+                ]
 
                 # update the list of new specs
                 new_specs = [*new_specs, *candidates]
@@ -99,10 +108,14 @@ def search(
 
         return population, best, done, generations
 
-    results: [List[List[SpecWrapper], List[SpecWrapper], Set[str], List[List[SpecWrapper]]]] = []
+    results: [
+        List[List[SpecWrapper], List[SpecWrapper], Set[str], List[List[SpecWrapper]]]
+    ] = []
     for epoch_num in range(num_epochs):
         population, best, done, generations = run_epoch(epoch_num, initial_population)
         results.append([population, best, done, generations])
-        banner(f"Finished evaluation, epoch {epoch_num+1}/{num_epochs}, {len(done)} models evaluated")
+        banner(
+            f"Finished evaluation, epoch {epoch_num+1}/{num_epochs}, {len(done)} models evaluated"
+        )
 
     return results

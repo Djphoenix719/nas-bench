@@ -26,7 +26,7 @@ class ModelData:
 
     @property
     def total_accuracy(self) -> float:
-        return (self.test_accuracy + self.valid_accuracy)/2
+        return (self.test_accuracy + self.valid_accuracy) / 2
 
 
 class SpecWrapper(ModelSpec):
@@ -38,7 +38,12 @@ class SpecWrapper(ModelSpec):
     Wraps a model to allow easier access to the resulting data of the model.
     """
 
-    def __init__(self, matrix: Union[str, np.ndarray], ops: List[str] = None, stop_halfway: bool = False):
+    def __init__(
+        self,
+        matrix: Union[str, np.ndarray],
+        ops: List[str] = None,
+        stop_halfway: bool = False,
+    ):
         self.id = next(SpecWrapper.id_iter)
         self.stop_halfway = stop_halfway
 
@@ -69,7 +74,7 @@ class SpecWrapper(ModelSpec):
     def get_hash(self):
         return self.hash_spec(nasbench.config["available_ops"])
 
-    @lru_cache(maxsize = 1)
+    @lru_cache(maxsize=1)
     def get_data(self):
         """
         Get resultant data from NASBench.

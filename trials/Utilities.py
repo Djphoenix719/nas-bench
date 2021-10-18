@@ -76,7 +76,9 @@ def build_experiment_results(
     return pdf, bdf, adf, pdf_stats, bdf_stats, adf_stats
 
 
-def write_table_html(df: pd.DataFrame, path: str, name: str, over_write: bool = False) -> None:
+def write_table_html(
+    df: pd.DataFrame, path: str, name: str, over_write: bool = False
+) -> None:
     """
     Write a table of html, optionally over-writing existing tables.
     :param df: The dataframe to write to file.
