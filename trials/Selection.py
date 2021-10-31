@@ -64,8 +64,39 @@ def sel_middle_fn(n_sel: int) -> Callable[[List[SpecWrapper]], List[SpecWrapper]
 
     def fn(population: List[SpecWrapper]):
         population = list(population)
+        population.sort()
         m_idx = int((len(population) - n_sel) / 2)
         return population[m_idx:-m_idx]
+
+    return fn
+
+
+def sel_e_greedy_fn(n_sel: int, e: float) -> Callable[[List[SpecWrapper]], List[SpecWrapper]]:
+    """
+    Select the n best candidates, but probabilistically select a random candidate.
+    :param n_sel: The number of candidates to select.
+    :param e: Probability that any individual candidate will be randomly selected.
+    """
+
+    n_sel = int(n_sel)
+    assert e >= 0
+    assert e <= 1
+
+    def fn(population: List[SpecWrapper]):
+        population = list(population)
+        population.sort()
+
+        candidates: List[SpecWrapper] = []
+        for idx in range(n_sel):
+            if random.random() < e:
+                sel_idx = random.randint(1, len(population) - 1)
+                candidates.append(population[sel_idx])
+                population.pop(sel_idx)
+            else:
+                candidates.append(population[-1])
+                population.pop(-1)
+
+        return candidates
 
     return fn
 
@@ -81,6 +112,21 @@ def drop_worst_fn(n_worst: int) -> Callable[[List[SpecWrapper]], List[SpecWrappe
         population = list(population)
         population.sort()
         return population[n_worst:]
+
+    return fn
+
+
+def drop_random_fn(n_drop: int) -> Callable[[List[SpecWrapper]], List[SpecWrapper]]:
+    """
+    Drop n random candidates and return the remaining population.
+    :param n_drop: Number of candidates to drop.
+    """
+    n_drop = int(n_drop)
+
+    def fn(population: List[SpecWrapper]):
+        population = list(population)
+        random.shuffle(population)
+        return population[n_drop:]
 
     return fn
 

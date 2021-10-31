@@ -57,7 +57,7 @@ class SpecWrapper(ModelSpec):
             super().__init__(matrix, ops)
 
     # defining how to compare two specs is all we need to sort
-    # we'll define basede on "total accuracy", which we assume
+    # we'll define based on "total accuracy", which we assume
     # to be test accuracy + validation accuracy. basically we're
     # dual optimizing with this
     def __lt__(self, other: "SpecWrapper"):
